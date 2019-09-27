@@ -1,0 +1,97 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{polski}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{xcolor,colortbl}
+\usepackage[left=1cm, right=1cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+\usepackage{hhline}
+
+\definecolor{lightgray}{gray}{0.9}
+
+\pagestyle{fancyplain} % Turn on the style
+\fancyhf{} % Start with clearing everything in the header and footer
+\renewcommand{\headrulewidth}{0pt} % remove lines as well
+\renewcommand{\footrulewidth}{0pt}
+% Set the right side of the footer to be the page number
+\fancyfoot[R]{Strona \thepage /1}
+
+\begin{document}
+
+\setlength{\arrayrulewidth}{0.8pt}
+
+\renewcommand{\arraystretch}{1.5}
+	
+	\parbox{0.95\textwidth}{
+	\begin{flushright}
+		\begin{tabular}{c}
+			\hhline{-}
+			\cellcolor{lightgray}Miejsce wystawienia\\
+			\textbf{BANINO}
+			\medskip\\
+			\hhline{-}
+			\cellcolor{lightgray}Data wystawienia\\
+			\textbf{26.09.2019}
+			\medskip\\
+			\hhline{-}
+			\cellcolor{lightgray}Data sprzedaży\\
+			\textbf{10.2019}
+			\medskip\\
+		\end{tabular}
+	\end{flushright}
+	}
+	
+	\begin{tabularx}{0.95\textwidth}{X l X}
+		\hhline{-~-}
+		\multicolumn{1}{c}{\cellcolor{lightgray}\textbf{Sprzedawca}} & \parbox{5mm}{\phantom{.}} & \multicolumn{1}{c}{\cellcolor{lightgray}\textbf{Nabywca}}\\
+		Grażyna Sosnowska &  & Rework\\
+		Pesel: 123 & & NIP: 456 \\
+		Spokojna 7 & & Gdzieś 6 \\
+		80-297 Banino & & Wawa \\ \\
+	\end{tabularx}
+%
+		
+	\begin{center}
+		\huge{\textbf{Rachunek 23113}}
+	\end{center}
+
+	\bigskip 
+
+	\begin{tabularx}{0.95\textwidth}{ | c | X | c | c | r | r |}
+		\hhline{------}
+		\cellcolor{lightgray}\textbf{Lp.} & \multicolumn{1}{|c|}{\cellcolor{lightgray}\textbf{Nazwa towaru lub usługi}} & \cellcolor{lightgray}\textbf{Jm.} & \cellcolor{lightgray}\textbf{Ilość} &  \multicolumn{1}{|c|}{\cellcolor{lightgray}\textbf{Cena}} & \multicolumn{1}{|c|}{\cellcolor{lightgray}\textbf{Wartość}} \\
+		\hline
+		1 & Wynajem pokoi pracownikom ( 01.10. ) & osoba & 2 & 600,00 & 1 200,00 \\
+		\hline
+		\multicolumn{4}{c}{} & \textbf{Razem} & 1 200,00 \\
+		\cline{6-6}
+	\end{tabularx}
+	
+	\bigskip 
+	\bigskip 
+
+	\begin{tabularx}{0.95\textwidth}{ l X c l X}
+		\hhline{--~--}
+		Sposób płatności & przelew & \parbox{5mm}{\phantom{.}} & \textbf{Do zapłaty} & 1 200,00 PLN \\
+		\hhline{--~--}
+		Termin płatności & 03-10-2019 & & Słownie & jeden tysiąc dwieście 00/100 zł \\
+		\hhline{--~~~}
+		Numer konta & 32 1321 3123 1231 2212 1312 & &  \\
+	\end{tabularx}
+
+	\bigskip 
+	\bigskip 
+	\bigskip 
+	\bigskip 
+
+	\begin{tabularx}{0.95\textwidth}{ l X c X l}
+		& & \parbox{5mm}{\phantom{.}} & & \\
+		\hhline{~-~-~}
+		& \multicolumn{1}{c}{\small{Podpis osoby upoważnionej do wystawienia}} & & \multicolumn{1}{c}{\small{Podpis osoby upoważnionej do odbioru}} & \\
+	\end{tabularx}
+		
+\end{document}
