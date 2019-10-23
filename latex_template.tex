@@ -1,4 +1,4 @@
-\documentclass[10pt,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{polski}
@@ -6,7 +6,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{xcolor,colortbl}
-\usepackage[left=1cm, right=1cm, top=2cm, bottom=2cm]{geometry}
+\usepackage[left=7mm, right=7mm, top=7mm, bottom=7mm]{geometry}
 \usepackage{tabularx}
 \usepackage{fancyhdr}
 \usepackage{hhline}
@@ -20,17 +20,18 @@
 % Set the right side of the footer to be the page number
 \fancyfoot[R]{Strona \thepage /1}
 
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
 \begin{document}
 
-\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\arrayrulewidth}{0.5pt}
 
 \renewcommand{\arraystretch}{1.5}
-	
 	\parbox{0.95\textwidth}{
 	\begin{flushright}
-		\begin{tabular}{c}
+		\begin{tabularx}{0.4\textwidth}{Y}
 			\hhline{-}
-			\cellcolor{lightgray}Miejsce wystawienia\\
+			\cellcolor{lightgray}1Miejsce wystawienia\\
 			\textbf{BANINO}
 			\medskip\\
 			\hhline{-}
@@ -41,7 +42,7 @@
 			\cellcolor{lightgray}Data sprzedaży\\
 			\textbf{10.2019}
 			\medskip\\
-		\end{tabular}
+		\end{tabularx}
 	\end{flushright}
 	}
 	
@@ -78,7 +79,7 @@
 		\hhline{--~--}
 		Sposób płatności & przelew & \parbox{5mm}{\phantom{.}} & \textbf{Do zapłaty} & 1 200,00 PLN \\
 		\hhline{--~--}
-		Termin płatności & 03-10-2019 & & Słownie & jeden tysiąc dwieście 00/100 zł \\
+		Termin płatności & 03.10.2019 & & Słownie & jeden tysiąc dwieście 00/100 zł \\
 		\hhline{--~~~}
 		Numer konta & 32 1321 3123 1231 2212 1312 & &  \\
 	\end{tabularx}
