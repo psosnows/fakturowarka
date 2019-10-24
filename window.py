@@ -37,7 +37,10 @@ class TableWidget(QTableWidget):
         qw_price = QTableWidgetItem(str(price))
         qw_total = QTableWidgetItem(str(float(quantity) * float(price)))
         button = DelButton("Usuń", self.rows)
-        button.clicked.connect(button.buttonOut)
+
+        # attach a virtual delete function that takes as the parameter the row of the pressed button
+        button.clicked.connect(lambda: self.deleteRow(button.row))
+
         self.buttons.append(button)
         self.insertRow(self.rows)
         self.setItem(self.rows, 0, qw_name)
@@ -48,8 +51,15 @@ class TableWidget(QTableWidget):
         self.setCellWidget(self.rows, 5, self.buttons[self.rows])
         self.rows += 1
 
-    def output(self):
-        print("ddsa")
+    def delFirstRow(self):
+        self.deleteRow(0)
+
+    def deleteRow(self,index):
+        self.removeRow(index)
+        for i in range(index, len(self.buttons)):
+            self.buttons[i].row -= 1
+        self.buttons.pop(index)
+        self.rows -= 1
 
 
 class Widget(QWidget):

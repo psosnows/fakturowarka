@@ -21,7 +21,7 @@ class InputDoc:
                  init_buyers_post='<kod pocztowy>',
                  init_buyers_city='<miejscowość>',
                  init_bills_id='0',
-                 init_items=[Item(), Item(), Item()],
+                 init_items=[Item("a","b",1,1),Item("a","b",1,2),Item("a","b",1,3),Item("a","b",1,4),Item("a","b",1,5)],
                  init_worded_total_payment='zero złotych',
                  init_payment_menthod='przelew',
                  init_payment_due_date='dd-mm-yyyy',
