@@ -1,11 +1,55 @@
-# get the sweet pyside QT widgets
-from PySide2.QtWidgets import (QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMainWindow, QAction,
+from PySide2.QtWidgets import (QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QMainWindow, QAction,
                                QApplication, QWidget, QFormLayout, QDateEdit, QLabel,
                                QTableWidget, QHeaderView, QTableWidgetItem)
 from PySide2.QtCore import (Slot, QDate, Qt)
 
 # get the class that manages all the data
-from input_doc import InputDoc
+from input_doc import InputDoc, Item
+
+
+class DelButton(QPushButton):
+    def __init__(self, text, row_number):
+        QPushButton.__init__(self, text)
+        self.row = row_number
+    def buttonOut(self):
+        print(self.row)
+
+class TableWidget(QTableWidget):
+    def __init__(self, init_items):
+        QTableWidget.__init__(self)
+        self.setColumnCount(6)
+        self.setHorizontalHeaderLabels(["Nazwa towaru lub usługi", "Jm.", "Ilość", "Cena", "Wartość", ""])
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.rows = 0
+        self.buttons = []
+
+        if init_items:
+            for it in init_items:
+                self.addItem(it)
+
+    def addItem(self, item):
+        self.addRow(item.name, item.unit, item.amount, item.price)
+
+    def addRow(self, name, unit, quantity, price):
+        qw_name = QTableWidgetItem(name)
+        qw_unit = QTableWidgetItem(unit)
+        qw_quantity = QTableWidgetItem(str(quantity))
+        qw_price = QTableWidgetItem(str(price))
+        qw_total = QTableWidgetItem(str(float(quantity) * float(price)))
+        button = DelButton("Usuń", self.rows)
+        button.clicked.connect(button.buttonOut)
+        self.buttons.append(button)
+        self.insertRow(self.rows)
+        self.setItem(self.rows, 0, qw_name)
+        self.setItem(self.rows, 1, qw_unit)
+        self.setItem(self.rows, 2, qw_quantity)
+        self.setItem(self.rows, 3, qw_price)
+        self.setItem(self.rows, 4, qw_total)
+        self.setCellWidget(self.rows, 5, self.buttons[self.rows])
+        self.rows += 1
+
+    def output(self):
+        print("ddsa")
 
 
 class Widget(QWidget):
@@ -32,12 +76,17 @@ class Widget(QWidget):
         self.input_buyers_post = QLineEdit(self.data.buyers_post)
         self.input_buyers_city = QLineEdit(self.data.buyers_city)
         self.input_bills_id = QLineEdit(self.data.bills_id)
-        self.input_items = QLineEdit("Miejsce na to co sprzedajemy")
         self.input_worded_total_payment = QLineEdit(self.data.worded_total_payment)
         self.input_payment_method = QLineEdit(self.data.payment_method)
         self.input_payment_due_date = QDateEdit()
         self.input_payment_due_date.setDate(QDate.currentDate())
         self.input_payment_account = QLineEdit(self.data.payment_account)
+
+        self.input_item_name = QLineEdit("<Wprowadź nazwę towaru>")
+        self.input_item_unit = QLineEdit("<jednostka>")
+        self.input_item_quantity = QLineEdit("<ilość>")
+        self.input_item_price = QLineEdit("<cena jednostki>")
+
 
         # Create widgets: top widget
         self.layout_place_dates = QFormLayout()
@@ -93,19 +142,23 @@ class Widget(QWidget):
         self.widget_doc_id.setLayout(self.layout_doc_id)
 
         # items
-        self.table = QTableWidget()
-        self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels(["Nazwa towaru lub usługi", "Jm.", "Ilość", "Cena", "Wartość", ""])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.insertRow(0)
-        self.someinput = QTableWidgetItem("some text")
-        self.someinput2 = QTableWidgetItem("some text")
-        self.delButton = QPushButton("Usuń")
+        self.item_add_button = QPushButton("Dodaj")
+        self.item_add_button.clicked.connect(self.addItem)
+        self.layout_item_input = QGridLayout()
+        self.layout_item_input.addWidget(QLabel("Nazwa towaru"),0,0)
+        self.layout_item_input.addWidget(QLabel("Jm."),0,1)
+        self.layout_item_input.addWidget(QLabel("Ilość"),0,2)
+        self.layout_item_input.addWidget(QLabel("Cena jednostki"),0,3)
+        self.layout_item_input.addWidget(QLabel(""),0,4)
+        self.layout_item_input.addWidget(self.input_item_name,1,0)
+        self.layout_item_input.addWidget(self.input_item_unit,1,1)
+        self.layout_item_input.addWidget(self.input_item_quantity,1,2)
+        self.layout_item_input.addWidget(self.input_item_price,1,3)
+        self.layout_item_input.addWidget(self.item_add_button,1,4)
+        self.widget_new_item = QWidget()
+        self.widget_new_item.setLayout(self.layout_item_input)
 
-        self.table.setItem(0,0,self.someinput)
-        self.table.setItem(0,1,self.someinput2)
-        self.table.setCellWidget(0,5,self.delButton)
-
+        self.table = TableWidget(self.data.items)
 
         # payment details
         self.layout_payment = QFormLayout()
@@ -126,7 +179,7 @@ class Widget(QWidget):
 
         layout.addWidget(self.widget_doc_id)
 
-        # TODO: table inputs
+        layout.addWidget(self.widget_new_item)
         layout.addWidget(self.table)
         layout.addWidget(self.input_worded_total_payment)
 
@@ -138,9 +191,17 @@ class Widget(QWidget):
         # Add button signal to greetings slot
         self.button.clicked.connect(self.greetings)
 
+    def addItem(self):
+        new_item = Item(self.input_item_name.text(),
+                        self.input_item_unit.text(),
+                        int(self.input_item_quantity.text()),
+                        float(self.input_item_price.text()))
+        self.data.items.append(new_item)
+        self.table.addItem(new_item)
+
     # Greets the user
     def greetings(self):
-        print ("Hello %s" % self.edit.text())
+        print ("Hello")
 
 
 class MainWindow(QMainWindow):

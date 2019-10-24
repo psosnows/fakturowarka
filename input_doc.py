@@ -1,11 +1,11 @@
-class InputDoc:
-    class Item:
-        def __init__(self, init_name='nazwa towaru', init_unit='j.m.', init_amount=1, init_price=0.0):
-            self.name = init_name
-            self.unit = init_unit
-            self.amount = init_amount
-            self.price = init_price
+class Item:
+    def __init__(self, init_name='towar', init_unit='szt.', init_amount=1, init_price=9.99):
+        self.name = init_name
+        self.unit = init_unit
+        self.amount = init_amount
+        self.price = init_price
 
+class InputDoc:
     def __init__(self,
                  init_place='<miejce>',
                  init_make_date='dd-mm-yyyy',
@@ -21,7 +21,7 @@ class InputDoc:
                  init_buyers_post='<kod pocztowy>',
                  init_buyers_city='<miejscowość>',
                  init_bills_id='0',
-                 init_items=[Item()],
+                 init_items=[Item(), Item(), Item()],
                  init_worded_total_payment='zero złotych',
                  init_payment_menthod='przelew',
                  init_payment_due_date='dd-mm-yyyy',
