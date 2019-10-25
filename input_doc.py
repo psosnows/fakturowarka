@@ -21,6 +21,7 @@ class InputDoc:
                  init_buyers_post='<kod pocztowy>',
                  init_buyers_city='<miejscowość>',
                  init_bills_id='0',
+#                  init_items=[],
                  init_items=[Item("a","b",1,1),Item("a","b",1,2),Item("a","b",1,3),Item("a","b",1,4),Item("a","b",1,5)],
                  init_worded_total_payment='zero złotych',
                  init_payment_menthod='przelew',
@@ -46,3 +47,12 @@ class InputDoc:
         self.payment_method = init_payment_menthod
         self.payment_due_date = init_payment_due_date
         self.payment_account = init_payment_account
+
+    def calc_total(self):
+        total = 0
+        for item in self.items:
+            total += item.price * item.amount
+        return total
+
+    def remove_item(self, index):
+        self.items.pop(index)

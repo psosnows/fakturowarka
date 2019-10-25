@@ -8,15 +8,20 @@ from input_doc import InputDoc, Item
 
 
 class DelButton(QPushButton):
-    def __init__(self, text, row_number):
+    def __init__(self, text, row_number, total=0):
         QPushButton.__init__(self, text)
         self.row = row_number
-    def buttonOut(self):
+        self.total = total
+
+    def button_out(self):
         print(self.row)
 
+
 class TableWidget(QTableWidget):
-    def __init__(self, init_items):
+    def __init__(self, init_items, reduce_func, item_remove_func):
         QTableWidget.__init__(self)
+        self.reduce_totals = reduce_func
+        self.remove_item = item_remove_func
         self.setColumnCount(6)
         self.setHorizontalHeaderLabels(["Nazwa towaru lub usługi", "Jm.", "Ilość", "Cena", "Wartość", ""])
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -25,21 +30,21 @@ class TableWidget(QTableWidget):
 
         if init_items:
             for it in init_items:
-                self.addItem(it)
+                self.add_item(it)
 
-    def addItem(self, item):
-        self.addRow(item.name, item.unit, item.amount, item.price)
+    def add_item(self, item):
+        self.add_row(item.name, item.unit, item.amount, item.price)
 
-    def addRow(self, name, unit, quantity, price):
+    def add_row(self, name, unit, quantity, price):
         qw_name = QTableWidgetItem(name)
         qw_unit = QTableWidgetItem(unit)
         qw_quantity = QTableWidgetItem(str(quantity))
         qw_price = QTableWidgetItem(str(price))
         qw_total = QTableWidgetItem(str(float(quantity) * float(price)))
-        button = DelButton("Usuń", self.rows)
+        button = DelButton("Usuń", self.rows, quantity * price)
 
         # attach a virtual delete function that takes as the parameter the row of the pressed button
-        button.clicked.connect(lambda: self.deleteRow(button.row))
+        button.clicked.connect(lambda: self.delete_row(button.row))
 
         self.buttons.append(button)
         self.insertRow(self.rows)
@@ -51,15 +56,56 @@ class TableWidget(QTableWidget):
         self.setCellWidget(self.rows, 5, self.buttons[self.rows])
         self.rows += 1
 
-    def delFirstRow(self):
-        self.deleteRow(0)
+    def del_first_row(self):
+        self.delete_row(0)
 
-    def deleteRow(self,index):
+    def delete_row(self, index):
         self.removeRow(index)
+        self.remove_item(index)
+        self.reduce_totals(self.buttons[index].total)
         for i in range(index, len(self.buttons)):
             self.buttons[i].row -= 1
         self.buttons.pop(index)
         self.rows -= 1
+
+
+class TotalWidget(QWidget):
+    def __init__(self, tot_widget):
+        QWidget.__init__(self)
+        self.total_worded_widget = tot_widget
+        self.total = 0
+        self.total_label = QLabel("Razem:\t%.2f zł" % self.total)
+        self.total_worded_widget.setAlignment(Qt.AlignRight)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.total_label, alignment=Qt.AlignRight)
+        main_layout.addWidget(self.total_worded_widget)
+
+        self.setLayout(main_layout)
+
+    def number_to_pl_words(self, total):
+        """
+        TODO : we need to add the functions
+        """
+        return str("%.2f złotych" % total)
+
+    def calc_total(self, items):
+        new_total = 0
+        for item in items:
+            new_total += item.amount * item.price
+        return new_total
+
+    def decrease_total(self, amount):
+        self.total -= amount
+        self.total_label.setText("Razem:\t%.2f zł" % self.total)
+        new_text = self.number_to_pl_words(self.total)
+        self.total_worded_widget.setText(new_text)
+
+    def update_totals(self, items):
+        self.total = self.calc_total(items)
+        self.total_label.setText("Razem:\t%.2f zł" % self.total)
+        new_text = self.number_to_pl_words(self.total)
+        self.total_worded_widget.setText(new_text)
 
 
 class Widget(QWidget):
@@ -153,7 +199,7 @@ class Widget(QWidget):
 
         # items
         self.item_add_button = QPushButton("Dodaj")
-        self.item_add_button.clicked.connect(self.addItem)
+        self.item_add_button.clicked.connect(self.add_item)
         self.layout_item_input = QGridLayout()
         self.layout_item_input.addWidget(QLabel("Nazwa towaru"),0,0)
         self.layout_item_input.addWidget(QLabel("Jm."),0,1)
@@ -168,7 +214,9 @@ class Widget(QWidget):
         self.widget_new_item = QWidget()
         self.widget_new_item.setLayout(self.layout_item_input)
 
-        self.table = TableWidget(self.data.items)
+        self.total = TotalWidget(self.input_worded_total_payment)
+        self.total.update_totals(self.data.items)
+        self.table = TableWidget(self.data.items, self.total.decrease_total, self.data.remove_item)
 
         # payment details
         self.layout_payment = QFormLayout()
@@ -191,7 +239,7 @@ class Widget(QWidget):
 
         layout.addWidget(self.widget_new_item)
         layout.addWidget(self.table)
-        layout.addWidget(self.input_worded_total_payment)
+        layout.addWidget(self.total)
 
         layout.addWidget(self.widget_payment)
 
@@ -201,17 +249,19 @@ class Widget(QWidget):
         # Add button signal to greetings slot
         self.button.clicked.connect(self.greetings)
 
-    def addItem(self):
+    def add_item(self):
         new_item = Item(self.input_item_name.text(),
                         self.input_item_unit.text(),
                         int(self.input_item_quantity.text()),
                         float(self.input_item_price.text()))
         self.data.items.append(new_item)
-        self.table.addItem(new_item)
+        self.table.add_item(new_item)
+        self.total.update_totals(self.data.items)
 
     # Greets the user
     def greetings(self):
         print ("Hello")
+        print(len(self.data.items))
 
 
 class MainWindow(QMainWindow):
