@@ -143,7 +143,6 @@ class Widget(QWidget):
         self.input_item_quantity = QLineEdit("<ilość>")
         self.input_item_price = QLineEdit("<cena jednostki>")
 
-
         # Create widgets: top widget
         self.layout_place_dates = QFormLayout()
         self.layout_place_dates.addRow("Miejsce wystawienia", self.input_place)
@@ -158,7 +157,7 @@ class Widget(QWidget):
         self.seller_label = QLabel("SPRZEDAWCA")
         self.seller_label.setStyleSheet("{color: #C0BBFE}")
         self.layout_seller.addWidget(self.seller_label)
-        
+
         self.layout_seller.addRow("Dane sprzedawcy", self.input_sellers_name)
         self.layout_seller.addRow("PESEL / NIP", self.input_sellers_id)
         self.layout_seller.addRow("Adres", self.input_sellers_address)
@@ -201,16 +200,16 @@ class Widget(QWidget):
         self.item_add_button = QPushButton("Dodaj")
         self.item_add_button.clicked.connect(self.add_item)
         self.layout_item_input = QGridLayout()
-        self.layout_item_input.addWidget(QLabel("Nazwa towaru"),0,0)
-        self.layout_item_input.addWidget(QLabel("Jm."),0,1)
-        self.layout_item_input.addWidget(QLabel("Ilość"),0,2)
-        self.layout_item_input.addWidget(QLabel("Cena jednostki"),0,3)
-        self.layout_item_input.addWidget(QLabel(""),0,4)
-        self.layout_item_input.addWidget(self.input_item_name,1,0)
-        self.layout_item_input.addWidget(self.input_item_unit,1,1)
-        self.layout_item_input.addWidget(self.input_item_quantity,1,2)
-        self.layout_item_input.addWidget(self.input_item_price,1,3)
-        self.layout_item_input.addWidget(self.item_add_button,1,4)
+        self.layout_item_input.addWidget(QLabel("Nazwa towaru"), 0, 0)
+        self.layout_item_input.addWidget(QLabel("Jm."), 0, 1)
+        self.layout_item_input.addWidget(QLabel("Ilość"), 0, 2)
+        self.layout_item_input.addWidget(QLabel("Cena jednostki"), 0, 3)
+        self.layout_item_input.addWidget(QLabel(""), 0, 4)
+        self.layout_item_input.addWidget(self.input_item_name, 1, 0)
+        self.layout_item_input.addWidget(self.input_item_unit, 1, 1)
+        self.layout_item_input.addWidget(self.input_item_quantity, 1, 2)
+        self.layout_item_input.addWidget(self.input_item_price, 1, 3)
+        self.layout_item_input.addWidget(self.item_add_button, 1, 4)
         self.widget_new_item = QWidget()
         self.widget_new_item.setLayout(self.layout_item_input)
 
@@ -260,7 +259,7 @@ class Widget(QWidget):
 
     # Greets the user
     def greetings(self):
-        print ("Hello")
+        print("Hello")
         print(len(self.data.items))
 
 
