@@ -5,6 +5,9 @@ class Item:
         self.amount = init_amount
         self.price = init_price
 
+    def __str__(self):
+        return str(self.name) + '\t' + str(self.unit) + '\t' + str(self.amount) + '\t' + str(self.price)
+
 class InputDoc:
     def __init__(self,
                  init_place='<miejce>',
@@ -56,3 +59,26 @@ class InputDoc:
 
     def remove_item(self, index):
         self.items.pop(index)
+
+    def __str__(self):
+        out = str(self.place) + '\n' + \
+            self.make_date + '\n' + \
+            self.sell_date + '\n' + \
+            self.sellers_name + '\n' + \
+            self.sellers_id + '\n' + \
+            self.sellers_address + '\n' + \
+            self.sellers_post  + '\n' + \
+            self.sellers_city + '\n' + \
+            self.buyers_name + '\n' + \
+            self.buyers_id + '\n' + \
+            self.buyers_address + '\n' + \
+            self.buyers_post + '\n' + \
+            self.buyers_city  + '\n' + \
+            self.bills_id + '\n'
+        for it in self.items:
+            out += it.__str__() + '\n'
+        out += self.worded_total_payment + '\n' + \
+            self.payment_method + '\n' + \
+            self.payment_due_date + '\n' + \
+            self.payment_account
+        return out

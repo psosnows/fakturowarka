@@ -20,22 +20,33 @@ class DelButton(QPushButton):
 class TableWidget(QTableWidget):
     def __init__(self, init_items, reduce_func, item_remove_func):
         QTableWidget.__init__(self)
+
+        # interaction with Widget that stores the total amount
+        # reference to function that reduce total amount
         self.reduce_totals = reduce_func
+        #reference to function that remove item from the list
         self.remove_item = item_remove_func
+
+        # initiate the table
         self.setColumnCount(6)
         self.setHorizontalHeaderLabels(["Nazwa towaru lub usługi", "Jm.", "Ilość", "Cena", "Wartość", ""])
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.rows = 0
+        # here we store all the "remove" buttons
         self.buttons = []
 
+        # if there are are initial items provided, add them to the list
         if init_items:
             for it in init_items:
                 self.add_item(it)
 
+    # wrapper method to add an item
     def add_item(self, item):
         self.add_row(item.name, item.unit, item.amount, item.price)
 
+    # adding a row with values
     def add_row(self, name, unit, quantity, price):
+        # create items and widgets
         qw_name = QTableWidgetItem(name)
         qw_unit = QTableWidgetItem(unit)
         qw_quantity = QTableWidgetItem(str(quantity))
@@ -46,6 +57,7 @@ class TableWidget(QTableWidget):
         # attach a virtual delete function that takes as the parameter the row of the pressed button
         button.clicked.connect(lambda: self.delete_row(button.row))
 
+        # insert items and widgets to their places
         self.buttons.append(button)
         self.insertRow(self.rows)
         self.setItem(self.rows, 0, qw_name)
@@ -56,9 +68,11 @@ class TableWidget(QTableWidget):
         self.setCellWidget(self.rows, 5, self.buttons[self.rows])
         self.rows += 1
 
+    # test function to remove first row
     def del_first_row(self):
         self.delete_row(0)
 
+    # delete a particular row in the table
     def delete_row(self, index):
         self.removeRow(index)
         self.remove_item(index)
@@ -257,10 +271,9 @@ class Widget(QWidget):
         self.table.add_item(new_item)
         self.total.update_totals(self.data.items)
 
-    # Greets the user
     def greetings(self):
         print("Hello")
-        print(len(self.data.items))
+        print(self.data)
 
 
 class MainWindow(QMainWindow):
