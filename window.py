@@ -285,6 +285,29 @@ class Widget(QWidget):
         self.table.add_item(new_item)
         self.total.increase_total(new_item.amount * new_item.price)
 
+    def generate_data(self):
+        doc = InputDoc(
+            self.input_place.text(),
+            self.input_make_date,
+            self.input_sell_date,
+            self.input_sellers_name,
+            self.input_sellers_id,
+            self.input_sellers_address,
+            self.input_sellers_post,
+            self.input_sellers_city,
+            self.input_buyers_name,
+            self.input_buyers_id,
+            self.input_buyers_address,
+            self.input_buyers_post,
+            self.input_buyers_city,
+            self.input_bills_id,
+            self.input_worded_total_payment,
+            self.input_payment_method,
+            self.input_payment_due_date,
+            self.input_payment_account
+            # TODO : I LEFT HERE
+        )
+
     def greetings(self):
         print("Hello")
         print(self.table.get_total())
