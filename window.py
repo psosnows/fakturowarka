@@ -18,14 +18,15 @@ class DelButton(QPushButton):
 
 
 class TableWidget(QTableWidget):
-    def __init__(self, init_items, reduce_func, item_remove_func):
+    def __init__(self, init_items, reduce_func):
         QTableWidget.__init__(self)
 
         # interaction with Widget that stores the total amount
         # reference to function that reduce total amount
         self.reduce_totals = reduce_func
+
         #reference to function that remove item from the list
-        self.remove_item = item_remove_func
+#        self.remove_item = item_remove_func
 
         # initiate the table
         self.setColumnCount(6)
@@ -39,6 +40,12 @@ class TableWidget(QTableWidget):
         if init_items:
             for it in init_items:
                 self.add_item(it)
+
+    def columnAt(self, index):
+        col = []
+        for i in range(self.rows):
+            col.append(self.item(i, index))
+        return col
 
     # wrapper method to add an item
     def add_item(self, item):
@@ -75,19 +82,25 @@ class TableWidget(QTableWidget):
     # delete a particular row in the table
     def delete_row(self, index):
         self.removeRow(index)
-        self.remove_item(index)
+#        self.remove_item(index)
         self.reduce_totals(self.buttons[index].total)
         for i in range(index, len(self.buttons)):
             self.buttons[i].row -= 1
         self.buttons.pop(index)
         self.rows -= 1
 
+    def get_total(self):
+        total = 0
+        for am, pr in zip(self.columnAt(2), self.columnAt(3)):
+            total += float(am.text()) * float(pr.text())
+        return total
+
 
 class TotalWidget(QWidget):
-    def __init__(self, tot_widget):
+    def __init__(self, tot_widget, init_total=0):
         QWidget.__init__(self)
         self.total_worded_widget = tot_widget
-        self.total = 0
+        self.total = init_total
         self.total_label = QLabel("Razem:\t%.2f zł" % self.total)
         self.total_worded_widget.setAlignment(Qt.AlignRight)
 
@@ -103,20 +116,19 @@ class TotalWidget(QWidget):
         """
         return str("%.2f złotych" % total)
 
-    def calc_total(self, items):
-        new_total = 0
-        for item in items:
-            new_total += item.amount * item.price
-        return new_total
+    def increase_total(self, amount):
+        self.total += amount
+        self.reset_text()
 
     def decrease_total(self, amount):
         self.total -= amount
-        self.total_label.setText("Razem:\t%.2f zł" % self.total)
-        new_text = self.number_to_pl_words(self.total)
-        self.total_worded_widget.setText(new_text)
+        self.reset_text()
 
-    def update_totals(self, items):
-        self.total = self.calc_total(items)
+    def reset_total(self, value):
+        self.total = value
+        self.reset_text()
+
+    def reset_text(self):
         self.total_label.setText("Razem:\t%.2f zł" % self.total)
         new_text = self.number_to_pl_words(self.total)
         self.total_worded_widget.setText(new_text)
@@ -127,30 +139,30 @@ class Widget(QWidget):
         QWidget.__init__(self)
 
         # Initialize data
-        self.data = InputDoc()
+#        self.data = InputDoc()
 
         # Create inputs
-        self.input_place = QLineEdit(self.data.place)
+        self.input_place = QLineEdit('Gdańsk')
         self.input_make_date = QDateEdit()
         self.input_make_date.setDate(QDate.currentDate())
         self.input_sell_date = QDateEdit()
         self.input_sell_date.setDate(QDate.currentDate())
-        self.input_sellers_name = QLineEdit(self.data.sellers_name)
-        self.input_sellers_id = QLineEdit(self.data.sellers_id)
-        self.input_sellers_address = QLineEdit(self.data.sellers_address)
-        self.input_sellers_post = QLineEdit(self.data.sellers_post)
-        self.input_sellers_city = QLineEdit(self.data.sellers_city)
-        self.input_buyers_name = QLineEdit(self.data.buyers_name)
-        self.input_buyers_id = QLineEdit(self.data.buyers_id)
-        self.input_buyers_address = QLineEdit(self.data.buyers_address)
-        self.input_buyers_post = QLineEdit(self.data.buyers_post)
-        self.input_buyers_city = QLineEdit(self.data.buyers_city)
-        self.input_bills_id = QLineEdit(self.data.bills_id)
-        self.input_worded_total_payment = QLineEdit(self.data.worded_total_payment)
-        self.input_payment_method = QLineEdit(self.data.payment_method)
+        self.input_sellers_name = QLineEdit('Grażyna Sosnowska')
+        self.input_sellers_id = QLineEdit('PESEL: 01010112345')
+        self.input_sellers_address = QLineEdit('Spokojna 7')
+        self.input_sellers_post = QLineEdit('80-297')
+        self.input_sellers_city = QLineEdit('Banino')
+        self.input_buyers_name = QLineEdit('<nazwa firmy>')
+        self.input_buyers_id = QLineEdit('NIP: 123')
+        self.input_buyers_address = QLineEdit('<ulica i numer domu>')
+        self.input_buyers_post = QLineEdit('00-000')
+        self.input_buyers_city = QLineEdit('<miasto>')
+        self.input_bills_id = QLineEdit('<numer rachunku>')
+        self.input_worded_total_payment = QLineEdit('zero złotych')
+        self.input_payment_method = QLineEdit('przelew')
         self.input_payment_due_date = QDateEdit()
         self.input_payment_due_date.setDate(QDate.currentDate())
-        self.input_payment_account = QLineEdit(self.data.payment_account)
+        self.input_payment_account = QLineEdit('<IBAN konta do przelewu>')
 
         self.input_item_name = QLineEdit("<Wprowadź nazwę towaru>")
         self.input_item_unit = QLineEdit("<jednostka>")
@@ -227,9 +239,11 @@ class Widget(QWidget):
         self.widget_new_item = QWidget()
         self.widget_new_item.setLayout(self.layout_item_input)
 
+        # first we create a widget that contains the totals
+        # it will pass its "reduce_total" function to Table Widget so we can sew it into Del buttons
         self.total = TotalWidget(self.input_worded_total_payment)
-        self.total.update_totals(self.data.items)
-        self.table = TableWidget(self.data.items, self.total.decrease_total, self.data.remove_item)
+
+        self.table = TableWidget([], self.total.decrease_total)
 
         # payment details
         self.layout_payment = QFormLayout()
@@ -267,13 +281,13 @@ class Widget(QWidget):
                         self.input_item_unit.text(),
                         int(self.input_item_quantity.text()),
                         float(self.input_item_price.text()))
-        self.data.items.append(new_item)
+#        self.data.items.append(new_item)
         self.table.add_item(new_item)
-        self.total.update_totals(self.data.items)
+        self.total.increase_total(new_item.amount * new_item.price)
 
     def greetings(self):
         print("Hello")
-        print(self.data)
+        print(self.table.get_total())
 
 
 class MainWindow(QMainWindow):
