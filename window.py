@@ -329,7 +329,7 @@ class Widget(QWidget):
                            str(item.unit) + " & " + \
                            item.amount + " & " + \
                            "%.2f" % float(item.price) + " & " + \
-                           "%.2f" % (float(item.amount)*float(item.price)) + "\n"
+                           "%.2f" % (float(item.amount)*float(item.price)) + " \\\\ \n"
             items_input += "\t\t\hline\n"
 
         env = make_env(loader=FileSystemLoader('.'))
@@ -354,11 +354,12 @@ class Widget(QWidget):
             payment_due_date=f.payment_due_date.__str__(),
             payment_account=f.payment_account.__str__(),
             total="%.2f" % self.total.total,
+            # items=str("")
             items=str(items_input)
         )
         print(rnd)
-        # pdf = build_pdf(rnd)
-        # pdf.save_to('test.pdf')
+        pdf = build_pdf(rnd,builder="pdflatex")
+        pdf.save_to('test.pdf')
 
 
 class MainWindow(QMainWindow):
