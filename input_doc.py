@@ -67,13 +67,13 @@ class InputDoc:
             self.sellers_name + '\n' + \
             self.sellers_id + '\n' + \
             self.sellers_address + '\n' + \
-            self.sellers_post  + '\n' + \
+            self.sellers_post + '\n' + \
             self.sellers_city + '\n' + \
             self.buyers_name + '\n' + \
             self.buyers_id + '\n' + \
             self.buyers_address + '\n' + \
             self.buyers_post + '\n' + \
-            self.buyers_city  + '\n' + \
+            self.buyers_city + '\n' + \
             self.bills_id + '\n'
         for it in self.items:
             out += it.__str__() + '\n'

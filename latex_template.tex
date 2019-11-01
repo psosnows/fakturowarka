@@ -31,16 +31,16 @@
 	\begin{flushright}
 		\begin{tabularx}{0.4\textwidth}{Y}
 			\hhline{-}
-			\cellcolor{lightgray}1Miejsce wystawienia\\
-			\textbf{BANINO}
+			\cellcolor{lightgray}Miejsce wystawienia\\
+			\textbf{\VAR{place|e}}
 			\medskip\\
 			\hhline{-}
 			\cellcolor{lightgray}Data wystawienia\\
-			\textbf{26.09.2019}
+			\textbf{\VAR{make_date|e}}
 			\medskip\\
 			\hhline{-}
 			\cellcolor{lightgray}Data sprzedaży\\
-			\textbf{10.2019}
+			\textbf{\VAR{sell_date|e}}
 			\medskip\\
 		\end{tabularx}
 	\end{flushright}
@@ -49,15 +49,15 @@
 	\begin{tabularx}{0.95\textwidth}{X l X}
 		\hhline{-~-}
 		\multicolumn{1}{c}{\cellcolor{lightgray}\textbf{Sprzedawca}} & \parbox{5mm}{\phantom{.}} & \multicolumn{1}{c}{\cellcolor{lightgray}\textbf{Nabywca}}\\
-		Grażyna Sosnowska &  & Rework\\
-		Pesel: 123 & & NIP: 456 \\
-		Spokojna 7 & & Gdzieś 6 \\
-		80-297 Banino & & Wawa \\ \\
+		\VAR{sellers_name|e} &  & \VAR{buyers_name|e}\\
+		\VAR{sellers_id|e} & & \VAR{buyers_id|e} \\
+		\VAR{sellers_address|e} & & \VAR{buyers_address|e} \\
+		\VAR{sellers_post|e} \VAR{sellers_city|e} & & \VAR{buyers_post|e} \VAR{buyers_city|e} \\ \\
 	\end{tabularx}
 %
 		
 	\begin{center}
-		\huge{\textbf{Rachunek 23113}}
+		\huge{\textbf{\VAR{bills_id|e}}}
 	\end{center}
 
 	\bigskip 
@@ -68,7 +68,8 @@
 		\hline
 		1 & Wynajem pokoi pracownikom ( 01.10. ) & osoba & 2 & 600,00 & 1 200,00 \\
 		\hline
-		\multicolumn{4}{c}{} & \textbf{Razem} & 1 200,00 \\
+\VAR{items}
+		\multicolumn{4}{c}{} & \textbf{Razem} & \VAR{total|e} \\
 		\cline{6-6}
 	\end{tabularx}
 	
@@ -77,11 +78,11 @@
 
 	\begin{tabularx}{0.95\textwidth}{ l X c l X}
 		\hhline{--~--}
-		Sposób płatności & przelew & \parbox{5mm}{\phantom{.}} & \textbf{Do zapłaty} & 1 200,00 PLN \\
+		Sposób płatności & \VAR{payment_method|e} & \parbox{5mm}{\phantom{.}} & \textbf{Do zapłaty} & \VAR{total|e} PLN \\
 		\hhline{--~--}
-		Termin płatności & 03.10.2019 & & Słownie & jeden tysiąc dwieście 00/100 zł \\
+		Termin płatności & \VAR{payment_due_date|e} & & Słownie & \VAR{worded_total_payment|e} 00/100 zł \\
 		\hhline{--~~~}
-		Numer konta & 32 1321 3123 1231 2212 1312 & &  \\
+		Numer konta & \VAR{payment_account|e} & &  \\
 	\end{tabularx}
 
 	\bigskip 

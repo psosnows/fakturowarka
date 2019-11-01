@@ -1,7 +1,7 @@
+from PySide2.QtCore import (Slot, QDate, Qt)
 from PySide2.QtWidgets import (QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QMainWindow, QAction,
                                QApplication, QWidget, QFormLayout, QDateEdit, QLabel,
                                QTableWidget, QHeaderView, QTableWidgetItem)
-from PySide2.QtCore import (Slot, QDate, Qt)
 
 # get the class that manages all the data
 from input_doc import InputDoc, Item
@@ -18,6 +18,8 @@ class DelButton(QPushButton):
 
 
 class TableWidget(QTableWidget):
+    # TODO: need to add a function that updates totals in rows when values change
+
     def __init__(self, init_items, reduce_func):
         QTableWidget.__init__(self)
 
@@ -95,6 +97,12 @@ class TableWidget(QTableWidget):
             total += float(am.text()) * float(pr.text())
         return total
 
+    def get_items(self):
+        items = []
+        for nam, uni, am, pr in zip(self.columnAt(0),self.columnAt(1),self.columnAt(2),self.columnAt(3)):
+            items.append(Item(nam.text(), uni.text(), am.text(), pr.text()))
+        return items
+
 
 class TotalWidget(QWidget):
     def __init__(self, tot_widget, init_total=0):
@@ -137,9 +145,6 @@ class TotalWidget(QWidget):
 class Widget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
-
-        # Initialize data
-#        self.data = InputDoc()
 
         # Create inputs
         self.input_place = QLineEdit('Gdańsk')
@@ -255,7 +260,7 @@ class Widget(QWidget):
         self.widget_payment.setLayout(self.layout_payment)
 
         # end button
-        self.button = QPushButton("Show Greetings")
+        self.button = QPushButton("Generuj PDF")
 
         # Create layout and add widgets
         layout = QVBoxLayout()
@@ -274,7 +279,7 @@ class Widget(QWidget):
         # Set dialog layout
         self.setLayout(layout)
         # Add button signal to greetings slot
-        self.button.clicked.connect(self.greetings)
+        self.button.clicked.connect(self.generate_pdf)
 
     def add_item(self):
         new_item = Item(self.input_item_name.text(),
@@ -286,31 +291,74 @@ class Widget(QWidget):
         self.total.increase_total(new_item.amount * new_item.price)
 
     def generate_data(self):
-        doc = InputDoc(
+        items = self.table.get_items()
+        return InputDoc(
             self.input_place.text(),
-            self.input_make_date,
-            self.input_sell_date,
-            self.input_sellers_name,
-            self.input_sellers_id,
-            self.input_sellers_address,
-            self.input_sellers_post,
-            self.input_sellers_city,
-            self.input_buyers_name,
-            self.input_buyers_id,
-            self.input_buyers_address,
-            self.input_buyers_post,
-            self.input_buyers_city,
-            self.input_bills_id,
-            self.input_worded_total_payment,
-            self.input_payment_method,
-            self.input_payment_due_date,
-            self.input_payment_account
-            # TODO : I LEFT HERE
+            self.input_make_date.text(),
+            self.input_sell_date.text(),
+            self.input_sellers_name.text(),
+            self.input_sellers_id.text(),
+            self.input_sellers_address.text(),
+            self.input_sellers_post.text(),
+            self.input_sellers_city.text(),
+            self.input_buyers_name.text(),
+            self.input_buyers_id.text(),
+            self.input_buyers_address.text(),
+            self.input_buyers_post.text(),
+            self.input_buyers_city.text(),
+            self.input_bills_id.text(),
+            items,
+            self.input_worded_total_payment.text(),
+            self.input_payment_method.text(),
+            self.input_payment_due_date.text(),
+            self.input_payment_account.text()
         )
 
-    def greetings(self):
+    def generate_pdf(self):
+        from jinja2.loaders import FileSystemLoader
+        from latex.jinja2 import make_env
+        from latex import build_pdf
+
         print("Hello")
-        print(self.table.get_total())
+        f = self.generate_data()
+
+        items_input = ""
+        for i, item in enumerate(f.items):
+            items_input += "\t\t%d & " % (i+1) + \
+                           str(item.name) + " & " + \
+                           str(item.unit) + " & " + \
+                           item.amount + " & " + \
+                           "%.2f" % float(item.price) + " & " + \
+                           "%.2f" % (float(item.amount)*float(item.price)) + "\n"
+            items_input += "\t\t\hline\n"
+
+        env = make_env(loader=FileSystemLoader('.'))
+        tpl = env.get_template('latex_template.tex')
+        rnd = tpl.render(
+            place=f.place.__str__(),
+            make_date=f.make_date.__str__(),
+            sell_date=f.sell_date.__str__(),
+            sellers_name=f.sellers_name.__str__(),
+            sellers_id=f.sellers_id.__str__(),
+            sellers_address=f.sellers_address.__str__(),
+            sellers_post=f.sellers_post.__str__(),
+            sellers_city=f.sellers_city.__str__(),
+            buyers_name=f.buyers_name.__str__(),
+            buyers_id=f.buyers_id.__str__(),
+            buyers_address=f.buyers_address.__str__(),
+            buyers_post=f.buyers_post.__str__(),
+            buyers_city=f.buyers_city.__str__(),
+            bills_id=f.bills_id.__str__(),
+            worded_total_payment=f.worded_total_payment.__str__(),
+            payment_method=f.payment_method.__str__(),
+            payment_due_date=f.payment_due_date.__str__(),
+            payment_account=f.payment_account.__str__(),
+            total="%.2f" % self.total.total,
+            items=str(items_input)
+        )
+        print(rnd)
+        # pdf = build_pdf(rnd)
+        # pdf.save_to('test.pdf')
 
 
 class MainWindow(QMainWindow):
