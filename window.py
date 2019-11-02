@@ -75,6 +75,10 @@ class TableWidget(QTableWidget):
         self.setItem(self.rows, 3, qw_price)
         self.setItem(self.rows, 4, qw_total)
         self.setCellWidget(self.rows, 5, self.buttons[self.rows])
+
+        # connect to event when any cell is changed
+        self.cellChanged.connect(self.recalc_total)
+
         self.rows += 1
 
     # test function to remove first row
@@ -84,7 +88,6 @@ class TableWidget(QTableWidget):
     # delete a particular row in the table
     def delete_row(self, index):
         self.removeRow(index)
-#        self.remove_item(index)
         self.reduce_totals(self.buttons[index].total)
         for i in range(index, len(self.buttons)):
             self.buttons[i].row -= 1
@@ -102,6 +105,12 @@ class TableWidget(QTableWidget):
         for nam, uni, am, pr in zip(self.columnAt(0),self.columnAt(1),self.columnAt(2),self.columnAt(3)):
             items.append(Item(nam.text(), uni.text(), am.text(), pr.text()))
         return items
+
+    def recalc_total(self):
+        items = self.selectedItems()
+        nth_row = items[0].row()
+        new_total = float(self.item(nth_row, 2).text()) * float(self.item(nth_row, 3).text())
+        self.item(nth_row, 4).setText("%.2f" % new_total)
 
 
 class TotalWidget(QWidget):
@@ -162,7 +171,7 @@ class Widget(QWidget):
         self.input_buyers_address = QLineEdit('<ulica i numer domu>')
         self.input_buyers_post = QLineEdit('00-000')
         self.input_buyers_city = QLineEdit('<miasto>')
-        self.input_bills_id = QLineEdit('<numer rachunku>')
+        self.input_bills_id = QLineEdit('R/01/'+str(QDate.currentDate().month())+'/'+str(QDate.currentDate().year()))
         self.input_worded_total_payment = QLineEdit('zero złotych')
         self.input_payment_method = QLineEdit('przelew')
         self.input_payment_due_date = QDateEdit()
@@ -170,9 +179,9 @@ class Widget(QWidget):
         self.input_payment_account = QLineEdit('<IBAN konta do przelewu>')
 
         self.input_item_name = QLineEdit("<Wprowadź nazwę towaru>")
-        self.input_item_unit = QLineEdit("<jednostka>")
-        self.input_item_quantity = QLineEdit("<ilość>")
-        self.input_item_price = QLineEdit("<cena jednostki>")
+        self.input_item_unit = QLineEdit("osobo-doba")
+        self.input_item_quantity = QLineEdit("1")
+        self.input_item_price = QLineEdit("25")
 
         # Create widgets: top widget
         self.layout_place_dates = QFormLayout()
