@@ -1,7 +1,7 @@
 from PySide2.QtCore import (Slot, QDate, Qt)
 from PySide2.QtWidgets import (QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QMainWindow, QAction,
                                QApplication, QWidget, QFormLayout, QDateEdit, QLabel,
-                               QTableWidget, QHeaderView, QTableWidgetItem)
+                               QTableWidget, QHeaderView, QTableWidgetItem, QCheckBox)
 
 # get the class that manages all the data
 from input_doc import InputDoc, Item
@@ -35,9 +35,7 @@ class TableWidget(QTableWidget):
         self.buttons = []
 
         # if there are are initial items provided, add them to the list
-        if init_items:
-            for it in init_items:
-                self.add_item(it)
+        self.replace_items(init_items)
 
     # adding extra functions that will reduce values in other objects (namely Total Widget)
     def placeholder_function(self):
@@ -124,18 +122,29 @@ class TableWidget(QTableWidget):
             self.item(nth_row, 4).setText("%.2f" % new_total)
             self.reset_total_widget(self.get_total())
 
+    def replace_items(self, new_items=[]):
+        while self.rowCount() > 0:
+            self.del_first_row()
+        for item in new_items:
+            self.add_item(item)
+
+
 
 class TotalWidget(QWidget):
-    def __init__(self, tot_widget, init_total=0):
+    def __init__(self, tot_widget, box, init_total=0):
         QWidget.__init__(self)
         self.total_worded_widget = tot_widget
+        self.checkbox = box
         self.total = init_total
         self.total_label = QLabel("Razem:\t%.2f zł" % self.total)
         self.total_worded_widget.setAlignment(Qt.AlignRight)
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.total_label, alignment=Qt.AlignRight)
-        main_layout.addWidget(self.total_worded_widget)
+        text_layout = QHBoxLayout()
+        text_layout.addWidget(self.checkbox)
+        text_layout.addWidget(self.total_worded_widget)
+        main_layout.addLayout(text_layout)
 
         self.setLayout(main_layout)
 
@@ -159,8 +168,9 @@ class TotalWidget(QWidget):
 
     def reset_text(self):
         self.total_label.setText("Razem:\t%.2f zł" % self.total)
-        new_text = self.number_to_pl_words(self.total)
-        self.total_worded_widget.setText(new_text)
+        if self.checkbox.isChecked():
+            new_text = self.number_to_pl_words(self.total)
+            self.total_worded_widget.setText(new_text)
 
 
 class Widget(QWidget):
@@ -184,7 +194,11 @@ class Widget(QWidget):
         self.input_buyers_post = QLineEdit('00-000')
         self.input_buyers_city = QLineEdit('<miasto>')
         self.input_bills_id = QLineEdit('R/01/'+str(QDate.currentDate().month())+'/'+str(QDate.currentDate().year()))
+        self.input_auto_generate = QCheckBox("Generuj automatycznie")
+        self.input_auto_generate.setChecked(True)
+        self.input_auto_generate.clicked.connect(self.toggle_text_generator)
         self.input_worded_total_payment = QLineEdit('zero złotych')
+        self.input_worded_total_payment.setDisabled(True)
         self.input_payment_method = QLineEdit('przelew')
         self.input_payment_due_date = QDateEdit()
         self.input_payment_due_date.setDate(QDate.currentDate())
@@ -267,7 +281,7 @@ class Widget(QWidget):
 
         # first we create a widget that contains the totals
         # it will pass its "reduce_total" function to Table Widget so we can sew it into Del buttons
-        self.total = TotalWidget(self.input_worded_total_payment)
+        self.total = TotalWidget(self.input_worded_total_payment, self.input_auto_generate)
 
         self.table = TableWidget()
         self.table.set_reset_total_widget(self.total.reset_total)
@@ -333,7 +347,12 @@ class Widget(QWidget):
             self.input_worded_total_payment.text(),
             self.input_payment_method.text(),
             self.input_payment_due_date.text(),
-            self.input_payment_account.text()
+            self.input_payment_account.text(),
+            self.input_item_name.text(),
+            self.input_item_unit.text(),
+            self.input_item_quantity.text(),
+            self.input_item_price.text(),
+            self.input_auto_generate
         )
 
     def generate_pdf(self):
@@ -403,12 +422,11 @@ class Widget(QWidget):
                 read_data = []
                 for line in file:
                     read_data.append(line.replace('\n',''))
-                print(read_data)
-                item_cnt = int(read_data[18])
+                item_cnt = int(read_data[22])
                 items = []
                 if item_cnt > 0:
                     for i in range(0, item_cnt):
-                        items.append(Item(read_data[i*4+19], read_data[i*4+20], read_data[i*4+21], read_data[i*4+22]))
+                        items.append(Item(read_data[i*4+23], read_data[i*4+24], read_data[i*4+25], read_data[i*4+26]))
                 loaded_state = InputDoc(
                     init_place=read_data[0],
                     init_make_date=read_data[1],
@@ -428,15 +446,50 @@ class Widget(QWidget):
                     init_worded_total_payment=read_data[14],
                     init_payment_menthod=read_data[15],
                     init_payment_due_date=read_data[16],
-                    init_payment_account=read_data[17]
+                    init_payment_account=read_data[17],
+                    init_item_input_name=read_data[18],
+                    init_item_input_unit=read_data[19],
+                    init_item_input_quantity=read_data[20],
+                    init_item_input_price=read_data[21]
                 )
                 self.set_state(loaded_state)
 
+    def toggle_text_generator(self):
+        if self.input_auto_generate.isChecked():
+            self.input_worded_total_payment.setDisabled(True)
+            self.total.reset_text()
+        else:
+            self.input_worded_total_payment.setDisabled(False)
+
     def set_state(self, doc_data):
-        pass
-        # TODO: tutaj się zatrzymałem
-        # potrzeba dodać ustawianie stanu bazując na danych z InputDoc
-        # ALE! InputDoc trzeba rozszerzyć o dane z pól wprowadzających oraz ścieżki zapisu plików (load/save)
+        self.input_place.setText(doc_data.place),
+        date = doc_data.make_date.split('.')
+        self.input_make_date.setDate(QDate(int(date[0]), int(date[1]), int(date[2]))),
+        date = doc_data.sell_date.split('.')
+        self.input_sell_date.setDate(QDate(int(date[0]), int(date[1]), int(date[2]))),
+        self.input_sellers_name.setText(doc_data.sellers_name),
+        self.input_sellers_id.setText(doc_data.sellers_id),
+        self.input_sellers_address.setText(doc_data.sellers_address),
+        self.input_sellers_post.setText(doc_data.sellers_post),
+        self.input_sellers_city.setText(doc_data.sellers_city),
+        self.input_buyers_name.setText(doc_data.buyers_name),
+        self.input_buyers_id.setText(doc_data.buyers_id),
+        self.input_buyers_address.setText(doc_data.buyers_address),
+        self.input_buyers_post.setText(doc_data.buyers_post),
+        self.input_buyers_city.setText(doc_data.buyers_city),
+        self.input_bills_id.setText(doc_data.bills_id),
+        self.input_worded_total_payment.setText(doc_data.worded_total_payment),
+        self.input_payment_method.setText(doc_data.payment_method),
+        date = doc_data.payment_due_date.split('.')
+        self.input_payment_due_date.setDate(QDate(int(date[0]), int(date[1]), int(date[2]))),
+        self.input_payment_account.setText(doc_data.payment_account),
+        self.input_item_name.setText(doc_data.item_input_name),
+        self.input_item_unit.setText(doc_data.item_input_unit),
+        self.input_item_quantity.setText(doc_data.item_input_quantity),
+        self.input_item_price.setText(doc_data.item_input_price),
+        self.input_auto_generate.setDisabled(doc_data.auto_generate)
+        self.toggle_text_generator()
+        self.table.replace_items(doc_data.items)
 
 
 class MainWindow(QMainWindow):

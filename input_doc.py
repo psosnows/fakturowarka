@@ -2,8 +2,8 @@ class Item:
     def __init__(self, init_name='towar', init_unit='szt.', init_amount=1, init_price=9.99):
         self.name = init_name
         self.unit = init_unit
-        self.amount = init_amount
-        self.price = init_price
+        self.amount = float(init_amount)
+        self.price = float(init_price)
 
     def __str__(self):
         return str(self.name) + '\n' + str(self.unit) + '\n' + str(self.amount) + '\n' + str(self.price)
@@ -29,7 +29,12 @@ class InputDoc:
                  init_worded_total_payment='zero złotych',
                  init_payment_menthod='przelew',
                  init_payment_due_date='dd-mm-yyyy',
-                 init_payment_account='12 1234 1234 1234 1234 1234'
+                 init_payment_account='12 1234 1234 1234 1234 1234',
+                 init_item_input_name='<wprowadź nazwę>',
+                 init_item_input_unit='j.m.',
+                 init_item_input_quantity='1',
+                 init_item_input_price='100',
+                 init_auto_generate=False
                  ):
         self.place = init_place
         self.make_date = init_make_date
@@ -50,6 +55,11 @@ class InputDoc:
         self.payment_method = init_payment_menthod
         self.payment_due_date = init_payment_due_date
         self.payment_account = init_payment_account
+        self.item_input_name = init_item_input_name
+        self.item_input_unit = init_item_input_unit
+        self.item_input_quantity = init_item_input_quantity
+        self.item_input_price = init_item_input_price
+        self.auto_generate = init_auto_generate
 
     def calc_total(self):
         total = 0
@@ -78,7 +88,11 @@ class InputDoc:
             self.worded_total_payment + '\n' + \
             self.payment_method + '\n' + \
             self.payment_due_date + '\n' + \
-            self.payment_account + '\n'
+            self.payment_account + '\n' + \
+            self.item_input_name + '\n' + \
+            self.item_input_unit + '\n' + \
+            self.item_input_quantity + '\n' + \
+            self.item_input_price + '\n'
         out += str(len(self.items)) + '\n'
         for it in self.items:
             out += it.__str__() + '\n'
