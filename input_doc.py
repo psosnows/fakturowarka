@@ -6,7 +6,7 @@ class Item:
         self.price = init_price
 
     def __str__(self):
-        return str(self.name) + '\t' + str(self.unit) + '\t' + str(self.amount) + '\t' + str(self.price)
+        return str(self.name) + '\n' + str(self.unit) + '\n' + str(self.amount) + '\n' + str(self.price)
 
 class InputDoc:
     def __init__(self,
@@ -74,11 +74,12 @@ class InputDoc:
             self.buyers_address + '\n' + \
             self.buyers_post + '\n' + \
             self.buyers_city + '\n' + \
-            self.bills_id + '\n'
-        for it in self.items:
-            out += it.__str__() + '\n'
-        out += self.worded_total_payment + '\n' + \
+            self.bills_id + '\n' + \
+            self.worded_total_payment + '\n' + \
             self.payment_method + '\n' + \
             self.payment_due_date + '\n' + \
-            self.payment_account
+            self.payment_account + '\n'
+        out += str(len(self.items)) + '\n'
+        for it in self.items:
+            out += it.__str__() + '\n'
         return out

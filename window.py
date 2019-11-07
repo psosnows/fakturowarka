@@ -341,10 +341,7 @@ class Widget(QWidget):
         from latex.jinja2 import make_env
         from latex import build_pdf
         from PySide2.QtWidgets import QFileDialog
-        from PySide2.QtCore import QCoreApplication
-        tr = QCoreApplication.translate
 
-        print("Hello")
         f = self.generate_data()
 
         items_input = ""
@@ -382,11 +379,64 @@ class Widget(QWidget):
             # items=str("")
             items=str(items_input)
         )
-        print(rnd)
         pdf = build_pdf(rnd,builder="pdflatex")
         save_to_location = QFileDialog.getSaveFileName(self, "Zapisz wygenerowany dokument", ".", "Plik PDF (*.pdf *.PDF)")
-        print(save_to_location)
-        pdf.save_to(save_to_location[0])
+        # TODO ADD MESSAGE IF SAVED OR NOT
+        if save_to_location[0]:
+            pdf.save_to(save_to_location[0])
+
+    def save_state(self):
+        from PySide2.QtWidgets import QFileDialog
+        app_data = self.generate_data()
+        save_to_location = QFileDialog.getSaveFileName(self, "Zapisz pracę", ".", "Plik fkt (*.fkt)")
+        if save_to_location[0]:
+            with open(save_to_location[0], 'w') as file:
+                file.write(str(app_data))
+                print(app_data)
+
+    def load_state(self):
+        from PySide2.QtWidgets import QFileDialog
+        from input_doc import Item, InputDoc
+        file_location = QFileDialog.getOpenFileName(self, "Wczytaj pracę", ".", "Plik fkt (*.fkt)")
+        if file_location[0]:
+            with open(file_location[0], 'r') as file:
+                read_data = []
+                for line in file:
+                    read_data.append(line.replace('\n',''))
+                print(read_data)
+                item_cnt = int(read_data[18])
+                items = []
+                if item_cnt > 0:
+                    for i in range(0, item_cnt):
+                        items.append(Item(read_data[i*4+19], read_data[i*4+20], read_data[i*4+21], read_data[i*4+22]))
+                loaded_state = InputDoc(
+                    init_place=read_data[0],
+                    init_make_date=read_data[1],
+                    init_sell_date=read_data[2],
+                    init_sellers_name=read_data[3],
+                    init_sellers_id=read_data[4],
+                    init_sellers_address=read_data[5],
+                    init_sellers_post=read_data[6],
+                    init_sellers_city=read_data[7],
+                    init_buyers_name=read_data[8],
+                    init_buyers_id=read_data[9],
+                    init_buyers_address=read_data[10],
+                    init_buyers_post=read_data[11],
+                    init_buyers_city=read_data[12],
+                    init_bills_id=read_data[13],
+                    init_items=items,
+                    init_worded_total_payment=read_data[14],
+                    init_payment_menthod=read_data[15],
+                    init_payment_due_date=read_data[16],
+                    init_payment_account=read_data[17]
+                )
+                self.set_state(loaded_state)
+
+    def set_state(self, doc_data):
+        pass
+        # TODO: tutaj się zatrzymałem
+        # potrzeba dodać ustawianie stanu bazując na danych z InputDoc
+        # ALE! InputDoc trzeba rozszerzyć o dane z pól wprowadzających oraz ścieżki zapisu plików (load/save)
 
 
 class MainWindow(QMainWindow):
@@ -397,6 +447,20 @@ class MainWindow(QMainWindow):
         # Menu
         self.menu = self.menuBar()
         self.file_menu = self.menu.addMenu("Plik")
+
+        # Load state QAction
+        load_state_action = QAction("Otwórz pracę", self)
+        load_state_action.setShortcut("Ctrl+L")
+        load_state_action.triggered.connect(widget.load_state)
+
+        self.file_menu.addAction(load_state_action)
+
+        # Save state QAction
+        save_state_action = QAction("Zapisz pracę", self)
+        save_state_action.setShortcut("Ctrl+S")
+        save_state_action.triggered.connect(widget.save_state)
+
+        self.file_menu.addAction(save_state_action)
 
         # Exit QAction
         exit_action = QAction("Zakończ", self)
