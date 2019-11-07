@@ -20,21 +20,17 @@ class DelButton(QPushButton):
 class TableWidget(QTableWidget):
     # TODO: need to add a function that updates totals in rows when values change
 
-    def __init__(self, init_items, reduce_func):
+    def __init__(self, init_items=[]):
         QTableWidget.__init__(self)
 
         # interaction with Widget that stores the total amount
-        # reference to function that reduce total amount
-        self.reduce_totals = reduce_func
-
-        #reference to function that remove item from the list
-#        self.remove_item = item_remove_func
+        # reference to function that resets total amount
+        self.reset_total_widget = self.placeholder_function
 
         # initiate the table
         self.setColumnCount(6)
         self.setHorizontalHeaderLabels(["Nazwa towaru lub usługi", "Jm.", "Ilość", "Cena", "Wartość", ""])
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.rows = 0
         # here we store all the "remove" buttons
         self.buttons = []
 
@@ -43,9 +39,16 @@ class TableWidget(QTableWidget):
             for it in init_items:
                 self.add_item(it)
 
+    # adding extra functions that will reduce values in other objects (namely Total Widget)
+    def placeholder_function(self):
+        pass
+
+    def set_reset_total_widget(self, rst_tot_widg):
+        self.reset_total_widget = rst_tot_widg
+
     def columnAt(self, index):
         col = []
-        for i in range(self.rows):
+        for i in range(self.rowCount()):
             col.append(self.item(i, index))
         return col
 
@@ -55,31 +58,32 @@ class TableWidget(QTableWidget):
 
     # adding a row with values
     def add_row(self, name, unit, quantity, price):
+
+        new_row_num = self.rowCount()
+
         # create items and widgets
         qw_name = QTableWidgetItem(name)
         qw_unit = QTableWidgetItem(unit)
         qw_quantity = QTableWidgetItem(str(quantity))
         qw_price = QTableWidgetItem(str(price))
         qw_total = QTableWidgetItem(str(float(quantity) * float(price)))
-        button = DelButton("Usuń", self.rows, quantity * price)
+        button = DelButton("Usuń", new_row_num, quantity * price)
 
         # attach a virtual delete function that takes as the parameter the row of the pressed button
         button.clicked.connect(lambda: self.delete_row(button.row))
 
         # insert items and widgets to their places
         self.buttons.append(button)
-        self.insertRow(self.rows)
-        self.setItem(self.rows, 0, qw_name)
-        self.setItem(self.rows, 1, qw_unit)
-        self.setItem(self.rows, 2, qw_quantity)
-        self.setItem(self.rows, 3, qw_price)
-        self.setItem(self.rows, 4, qw_total)
-        self.setCellWidget(self.rows, 5, self.buttons[self.rows])
+        self.insertRow(new_row_num)
+        self.setItem(new_row_num, 0, qw_name)
+        self.setItem(new_row_num, 1, qw_unit)
+        self.setItem(new_row_num, 2, qw_quantity)
+        self.setItem(new_row_num, 3, qw_price)
+        self.setItem(new_row_num, 4, qw_total)
+        self.setCellWidget(new_row_num, 5, self.buttons[new_row_num])
 
         # connect to event when any cell is changed
         self.cellChanged.connect(self.recalc_total)
-
-        self.rows += 1
 
     # test function to remove first row
     def del_first_row(self):
@@ -88,16 +92,22 @@ class TableWidget(QTableWidget):
     # delete a particular row in the table
     def delete_row(self, index):
         self.removeRow(index)
-        self.reduce_totals(self.buttons[index].total)
+
+        # self.reduce_totals(self.buttons[index].total)
+        self.reset_total_widget(self.get_total())
+
+        # each del button has an attached row index to it
+        # we need to update these row indexes since we removed an row
         for i in range(index, len(self.buttons)):
             self.buttons[i].row -= 1
         self.buttons.pop(index)
-        self.rows -= 1
 
     def get_total(self):
         total = 0
-        for am, pr in zip(self.columnAt(2), self.columnAt(3)):
-            total += float(am.text()) * float(pr.text())
+        if self.rowCount() > 0:
+            for am, pr in zip(self.columnAt(2), self.columnAt(3)):
+                total += float(am.text()) * float(pr.text())
+
         return total
 
     def get_items(self):
@@ -108,9 +118,11 @@ class TableWidget(QTableWidget):
 
     def recalc_total(self):
         items = self.selectedItems()
-        nth_row = items[0].row()
-        new_total = float(self.item(nth_row, 2).text()) * float(self.item(nth_row, 3).text())
-        self.item(nth_row, 4).setText("%.2f" % new_total)
+        if items:
+            nth_row = items[0].row()
+            new_total = float(self.item(nth_row, 2).text()) * float(self.item(nth_row, 3).text())
+            self.item(nth_row, 4).setText("%.2f" % new_total)
+            self.reset_total_widget(self.get_total())
 
 
 class TotalWidget(QWidget):
@@ -257,7 +269,8 @@ class Widget(QWidget):
         # it will pass its "reduce_total" function to Table Widget so we can sew it into Del buttons
         self.total = TotalWidget(self.input_worded_total_payment)
 
-        self.table = TableWidget([], self.total.decrease_total)
+        self.table = TableWidget()
+        self.table.set_reset_total_widget(self.total.reset_total)
 
         # payment details
         self.layout_payment = QFormLayout()
@@ -327,6 +340,9 @@ class Widget(QWidget):
         from jinja2.loaders import FileSystemLoader
         from latex.jinja2 import make_env
         from latex import build_pdf
+        from PySide2.QtWidgets import QFileDialog
+        from PySide2.QtCore import QCoreApplication
+        tr = QCoreApplication.translate
 
         print("Hello")
         f = self.generate_data()
@@ -368,7 +384,9 @@ class Widget(QWidget):
         )
         print(rnd)
         pdf = build_pdf(rnd,builder="pdflatex")
-        pdf.save_to('test.pdf')
+        save_to_location = QFileDialog.getSaveFileName(self, "Zapisz wygenerowany dokument", ".", "Plik PDF (*.pdf *.PDF)")
+        print(save_to_location)
+        pdf.save_to(save_to_location[0])
 
 
 class MainWindow(QMainWindow):
