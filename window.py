@@ -100,8 +100,8 @@ class TableWidget(QTableWidget):
             self.buttons[i].row -= 1
         self.buttons.pop(index)
 
-    def get_total(self):
-        total = 0
+    def get_total(self) -> float:
+        total = 0.0
         if self.rowCount() > 0:
             for am, pr in zip(self.columnAt(2), self.columnAt(3)):
                 total += float(am.text()) * float(pr.text())
@@ -176,6 +176,8 @@ class TotalWidget(QWidget):
 class Widget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
+
+        self.status = ""
 
         # Create inputs
         self.input_place = QLineEdit('Gdańsk')
@@ -400,9 +402,11 @@ class Widget(QWidget):
         )
         pdf = build_pdf(rnd,builder="pdflatex")
         save_to_location = QFileDialog.getSaveFileName(self, "Zapisz wygenerowany dokument", ".", "Plik PDF (*.pdf *.PDF)")
-        # TODO ADD MESSAGE IF SAVED OR NOT
         if save_to_location[0]:
             pdf.save_to(save_to_location[0])
+            self.status.showMessage("Wygenerowano i zapisano PDF", 2000)
+        else:
+            self.status.showMessage("NIE zapisano pliku PDF", 2000)
 
     def save_state(self):
         from PySide2.QtWidgets import QFileDialog
@@ -411,7 +415,8 @@ class Widget(QWidget):
         if save_to_location[0]:
             with open(save_to_location[0], 'w') as file:
                 file.write(str(app_data))
-                print(app_data)
+        self.status.showMessage("Zapisano pracę", 2000)
+        self.block_all(2000)
 
     def load_state(self):
         from PySide2.QtWidgets import QFileDialog
@@ -453,6 +458,7 @@ class Widget(QWidget):
                     init_item_input_price=read_data[21]
                 )
                 self.set_state(loaded_state)
+                self.status.showMessage("Wczytano pracę", 2000)
 
     def toggle_text_generator(self):
         if self.input_auto_generate.isChecked():
@@ -491,6 +497,9 @@ class Widget(QWidget):
         self.toggle_text_generator()
         self.table.replace_items(doc_data.items)
 
+    def connect_status(self, st):
+        self.status = st
+
 
 class MainWindow(QMainWindow):
     def __init__(self, widget):
@@ -523,6 +532,9 @@ class MainWindow(QMainWindow):
         self.file_menu.addAction(exit_action)
 
         self.setCentralWidget(widget)
+
+        self.status = self.statusBar()
+        widget.connect_status(self.status)
 
     @Slot()
     def exit_app(self, checked):
