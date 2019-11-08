@@ -14,19 +14,18 @@ class InputDoc:
                  init_place='<miejce>',
                  init_make_date='dd-mm-yyyy',
                  init_sell_date='dd-mm-yyyy',
-                 init_sellers_name='Grażyna Sosnowska',
-                 init_sellers_id='PESEL: 01010112345',
-                 init_sellers_address='Spokojna 7',
-                 init_sellers_post='80-297',
-                 init_sellers_city='Baninio',
-                 init_buyers_name='<nazwa firmy>',
-                 init_buyers_id='NIP: <01010112345>',
+                 init_sellers_name='<nazwa sprzedawcy>',
+                 init_sellers_id='<PESEL: / NIP:>',
+                 init_sellers_address='<Adres>',
+                 init_sellers_post='<kod pocztowy>',
+                 init_sellers_city='<Miasto>',
+                 init_buyers_name='<nazwa kupującego>',
+                 init_buyers_id='PESEL: / NIP:>',
                  init_buyers_address='<ulica>',
                  init_buyers_post='<kod pocztowy>',
                  init_buyers_city='<miejscowość>',
                  init_bills_id='0',
                  init_items=[],
-                 # init_items=[Item("a","b",1,1),Item("a","b",1,2),Item("a","b",1,3),Item("a","b",1,4),Item("a","b",1,5)],
                  init_worded_total_payment='zero złotych',
                  init_payment_menthod='przelew',
                  init_payment_due_date='dd-mm-yyyy',
@@ -93,7 +92,8 @@ class InputDoc:
             self.item_input_name + '\n' + \
             self.item_input_unit + '\n' + \
             self.item_input_quantity + '\n' + \
-            self.item_input_price + '\n'
+            self.item_input_price + '\n' + \
+            str(self.auto_generate) + '\n'
         out += str(len(self.items)) + '\n'
         for it in self.items:
             out += it.__str__() + '\n'

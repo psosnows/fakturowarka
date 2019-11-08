@@ -108,7 +108,7 @@ class TableWidget(QTableWidget):
 
     def get_items(self):
         items = []
-        for nam, uni, am, pr in zip(self.columnAt(0),self.columnAt(1),self.columnAt(2),self.columnAt(3)):
+        for nam, uni, am, pr in zip(self.columnAt(0), self.columnAt(1), self.columnAt(2), self.columnAt(3)):
             items.append(Item(nam.text(), uni.text(), am.text(), pr.text()))
         return items
 
@@ -125,7 +125,6 @@ class TableWidget(QTableWidget):
             self.del_first_row()
         for item in new_items:
             self.add_item(item)
-
 
 
 class TotalWidget(QWidget):
@@ -299,8 +298,15 @@ class Widget(QWidget):
         self.button = QPushButton("Generuj PDF")
 
         # Create layout and add widgets
+
+        top_layout = QHBoxLayout()
+        top_layout.addWidget(self.widget_payment)
+        top_layout.addWidget(self.widget_place_dates, alignment=Qt.AlignRight)
+
         layout = QVBoxLayout()
-        layout.addWidget(self.widget_place_dates, alignment=Qt.AlignRight)
+
+        layout.addLayout(top_layout)
+
         layout.addWidget(self.widget_seller_buyer)
 
         layout.addWidget(self.widget_doc_id)
@@ -308,8 +314,6 @@ class Widget(QWidget):
         layout.addWidget(self.widget_new_item)
         layout.addWidget(self.table)
         layout.addWidget(self.total)
-
-        layout.addWidget(self.widget_payment)
 
         layout.addWidget(self.button)
         # Set dialog layout
@@ -352,7 +356,7 @@ class Widget(QWidget):
             self.input_item_unit.text(),
             self.input_item_quantity.text(),
             self.input_item_price.text(),
-            self.input_auto_generate
+            self.input_auto_generate.isChecked()
         )
 
     def generate_pdf(self):
@@ -368,7 +372,7 @@ class Widget(QWidget):
             items_input += "\t\t%d & " % (i+1) + \
                            str(item.name) + " & " + \
                            str(item.unit) + " & " + \
-                           item.amount + " & " + \
+                           str(item.amount) + " & " + \
                            "%.2f" % float(item.price) + " & " + \
                            "%.2f" % (float(item.amount)*float(item.price)) + " \\\\ \n"
             items_input += "\t\t\hline\n"
@@ -395,10 +399,9 @@ class Widget(QWidget):
             payment_due_date=f.payment_due_date.__str__(),
             payment_account=f.payment_account.__str__(),
             total="%.2f" % self.total.total,
-            # items=str("")
             items=str(items_input)
         )
-        pdf = build_pdf(rnd,builder="pdflatex")
+        pdf = build_pdf(rnd, builder="pdflatex")
         save_to_location = QFileDialog.getSaveFileName(self, "Zapisz wygenerowany dokument", ".", "Plik PDF (*.pdf *.PDF)")
         if save_to_location[0]:
             pdf.save_to(save_to_location[0])
@@ -414,22 +417,24 @@ class Widget(QWidget):
             with open(save_to_location[0], 'w') as file:
                 file.write(str(app_data))
         self.status.showMessage("Zapisano pracę", 2000)
-        self.block_all(2000)
 
     def load_state(self):
         from PySide2.QtWidgets import QFileDialog
-        from input_doc import Item, InputDoc
         file_location = QFileDialog.getOpenFileName(self, "Wczytaj pracę", ".", "Plik fkt (*.fkt)")
+        self.make_load_state(file_location)
+
+    def make_load_state(self, file_location):
         if file_location[0]:
             with open(file_location[0], 'r') as file:
                 read_data = []
                 for line in file:
-                    read_data.append(line.replace('\n',''))
-                item_cnt = int(read_data[22])
+                    read_data.append(line.replace('\n', ''))
+                item_cnt = int(read_data[23])
                 items = []
                 if item_cnt > 0:
                     for i in range(0, item_cnt):
-                        items.append(Item(read_data[i*4+23], read_data[i*4+24], read_data[i*4+25], read_data[i*4+26]))
+                        items.append(Item(read_data[i*4+24], read_data[i*4+25], read_data[i*4+26], read_data[i*4+27]))
+                box_state = False if read_data[22] == 'False' else True
                 loaded_state = InputDoc(
                     init_place=read_data[0],
                     init_make_date=read_data[1],
@@ -452,8 +457,9 @@ class Widget(QWidget):
                     init_payment_account=read_data[17],
                     init_item_input_name=read_data[18],
                     init_item_input_unit=read_data[19],
-                    init_item_input_quantity=read_data[20],
-                    init_item_input_price=read_data[21]
+                    init_item_input_quantity=float(read_data[20]),
+                    init_item_input_price=float(read_data[21]),
+                    init_auto_generate=box_state
                 )
                 self.set_state(loaded_state)
                 self.status.showMessage("Wczytano pracę", 2000)
@@ -468,9 +474,9 @@ class Widget(QWidget):
     def set_state(self, doc_data):
         self.input_place.setText(doc_data.place),
         date = doc_data.make_date.split('.')
-        self.input_make_date.setDate(QDate(int(date[0]), int(date[1]), int(date[2]))),
+        self.input_make_date.setDate(QDate(int(date[2]), int(date[1]), int(date[0]))),
         date = doc_data.sell_date.split('.')
-        self.input_sell_date.setDate(QDate(int(date[0]), int(date[1]), int(date[2]))),
+        self.input_sell_date.setDate(QDate(int(date[2]), int(date[1]), int(date[0]))),
         self.input_sellers_name.setText(doc_data.sellers_name),
         self.input_sellers_id.setText(doc_data.sellers_id),
         self.input_sellers_address.setText(doc_data.sellers_address),
@@ -485,13 +491,13 @@ class Widget(QWidget):
         self.input_worded_total_payment.setText(doc_data.worded_total_payment),
         self.input_payment_method.setText(doc_data.payment_method),
         date = doc_data.payment_due_date.split('.')
-        self.input_payment_due_date.setDate(QDate(int(date[0]), int(date[1]), int(date[2]))),
+        self.input_payment_due_date.setDate(QDate(int(date[2]), int(date[1]), int(date[0]))),
         self.input_payment_account.setText(doc_data.payment_account),
         self.input_item_name.setText(doc_data.item_input_name),
         self.input_item_unit.setText(doc_data.item_input_unit),
-        self.input_item_quantity.setText(doc_data.item_input_quantity),
-        self.input_item_price.setText(doc_data.item_input_price),
-        self.input_auto_generate.setDisabled(doc_data.auto_generate)
+        self.input_item_quantity.setText(str(doc_data.item_input_quantity)),
+        self.input_item_price.setText(str(doc_data.item_input_price)),
+        self.input_auto_generate.setChecked(bool(doc_data.auto_generate))
         self.toggle_text_generator()
         self.table.replace_items(doc_data.items)
 
@@ -533,6 +539,8 @@ class MainWindow(QMainWindow):
 
         self.status = self.statusBar()
         widget.connect_status(self.status)
+
+        widget.make_load_state(["./domyślne.fkt"])
 
     @Slot()
     def exit_app(self, checked):
