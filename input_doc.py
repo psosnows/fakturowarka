@@ -8,6 +8,7 @@ class Item:
     def __str__(self):
         return str(self.name) + '\n' + str(self.unit) + '\n' + str(self.amount) + '\n' + str(self.price)
 
+
 class InputDoc:
     def __init__(self,
                  init_place='<miejce>',

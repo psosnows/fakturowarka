@@ -18,8 +18,6 @@ class DelButton(QPushButton):
 
 
 class TableWidget(QTableWidget):
-    # TODO: need to add a function that updates totals in rows when values change
-
     def __init__(self, init_items=[]):
         QTableWidget.__init__(self)
 

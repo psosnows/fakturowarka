@@ -1,7 +1,5 @@
 import sys
 
-from PySide2.QtWidgets import QApplication
-
 # get the form that works the inputs
 from window import *
 
