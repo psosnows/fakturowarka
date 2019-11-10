@@ -425,44 +425,47 @@ class Widget(QWidget):
 
     def make_load_state(self, file_location):
         if file_location[0]:
-            with open(file_location[0], 'r') as file:
-                read_data = []
-                for line in file:
-                    read_data.append(line.replace('\n', ''))
-                item_cnt = int(read_data[23])
-                items = []
-                if item_cnt > 0:
-                    for i in range(0, item_cnt):
-                        items.append(Item(read_data[i*4+24], read_data[i*4+25], read_data[i*4+26], read_data[i*4+27]))
-                box_state = False if read_data[22] == 'False' else True
-                loaded_state = InputDoc(
-                    init_place=read_data[0],
-                    init_make_date=read_data[1],
-                    init_sell_date=read_data[2],
-                    init_sellers_name=read_data[3],
-                    init_sellers_id=read_data[4],
-                    init_sellers_address=read_data[5],
-                    init_sellers_post=read_data[6],
-                    init_sellers_city=read_data[7],
-                    init_buyers_name=read_data[8],
-                    init_buyers_id=read_data[9],
-                    init_buyers_address=read_data[10],
-                    init_buyers_post=read_data[11],
-                    init_buyers_city=read_data[12],
-                    init_bills_id=read_data[13],
-                    init_items=items,
-                    init_worded_total_payment=read_data[14],
-                    init_payment_menthod=read_data[15],
-                    init_payment_due_date=read_data[16],
-                    init_payment_account=read_data[17],
-                    init_item_input_name=read_data[18],
-                    init_item_input_unit=read_data[19],
-                    init_item_input_quantity=float(read_data[20]),
-                    init_item_input_price=float(read_data[21]),
-                    init_auto_generate=box_state
-                )
-                self.set_state(loaded_state)
-                self.status.showMessage("Wczytano pracę", 2000)
+            try:
+                with open(file_location[0], 'r') as file:
+                    read_data = []
+                    for line in file:
+                        read_data.append(line.replace('\n', ''))
+                    item_cnt = int(read_data[23])
+                    items = []
+                    if item_cnt > 0:
+                        for i in range(0, item_cnt):
+                            items.append(Item(read_data[i*4+24], read_data[i*4+25], read_data[i*4+26], read_data[i*4+27]))
+                    box_state = False if read_data[22] == 'False' else True
+                    loaded_state = InputDoc(
+                        init_place=read_data[0],
+                        init_make_date=read_data[1],
+                        init_sell_date=read_data[2],
+                        init_sellers_name=read_data[3],
+                        init_sellers_id=read_data[4],
+                        init_sellers_address=read_data[5],
+                        init_sellers_post=read_data[6],
+                        init_sellers_city=read_data[7],
+                        init_buyers_name=read_data[8],
+                        init_buyers_id=read_data[9],
+                        init_buyers_address=read_data[10],
+                        init_buyers_post=read_data[11],
+                        init_buyers_city=read_data[12],
+                        init_bills_id=read_data[13],
+                        init_items=items,
+                        init_worded_total_payment=read_data[14],
+                        init_payment_menthod=read_data[15],
+                        init_payment_due_date=read_data[16],
+                        init_payment_account=read_data[17],
+                        init_item_input_name=read_data[18],
+                        init_item_input_unit=read_data[19],
+                        init_item_input_quantity=float(read_data[20]),
+                        init_item_input_price=float(read_data[21]),
+                        init_auto_generate=box_state
+                    )
+                    self.set_state(loaded_state)
+                    self.status.showMessage("Wczytano pracę", 2000)
+            except FileNotFoundError:
+                self.status.showMessage("Wczytano stan zero. Brak pliku startowego: domyślne.fkk", 2000)
 
     def toggle_text_generator(self):
         if self.input_auto_generate.isChecked():
