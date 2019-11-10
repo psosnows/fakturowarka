@@ -1,0 +1,98 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{polski}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{xcolor,colortbl}
+\usepackage[left=7mm, right=7mm, top=7mm, bottom=7mm]{geometry}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+\usepackage{hhline}
+
+\definecolor{lightgray}{gray}{0.9}
+
+\pagestyle{fancyplain} % Turn on the style
+\fancyhf{} % Start with clearing everything in the header and footer
+\renewcommand{\headrulewidth}{0pt} % remove lines as well
+\renewcommand{\footrulewidth}{0pt}
+% Set the right side of the footer to be the page number
+\fancyfoot[R]{Strona \thepage /1}
+
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+\begin{document}
+
+\setlength{\arrayrulewidth}{0.5pt}
+
+\renewcommand{\arraystretch}{1.5}
+	\parbox{0.95\textwidth}{
+	\begin{flushright}
+		\begin{tabularx}{0.4\textwidth}{Y}
+			\hhline{-}
+			\cellcolor{lightgray}Miejsce wystawienia\\
+			\textbf{\VAR{place|e}}
+			\medskip\\
+			\hhline{-}
+			\cellcolor{lightgray}Data wystawienia\\
+			\textbf{\VAR{make_date|e}}
+			\medskip\\
+			\hhline{-}
+			\cellcolor{lightgray}Data sprzedaży\\
+			\textbf{\VAR{sell_date|e}}
+			\medskip\\
+		\end{tabularx}
+	\end{flushright}
+	}
+	
+	\begin{tabularx}{0.95\textwidth}{X l X}
+		\hhline{-~-}
+		\multicolumn{1}{c}{\cellcolor{lightgray}\textbf{Sprzedawca}} & \parbox{5mm}{\phantom{.}} & \multicolumn{1}{c}{\cellcolor{lightgray}\textbf{Nabywca}}\\
+		\VAR{sellers_name|e} &  & \VAR{buyers_name|e}\\
+		\VAR{sellers_id|e} & & \VAR{buyers_id|e} \\
+		\VAR{sellers_address|e} & & \VAR{buyers_address|e} \\
+		\VAR{sellers_post|e} \VAR{sellers_city|e} & & \VAR{buyers_post|e} \VAR{buyers_city|e} \\ \\
+	\end{tabularx}
+
+	\begin{center}
+		\huge{\textbf{\VAR{bills_id|e}}}
+	\end{center}
+
+	\bigskip 
+
+	\begin{tabularx}{0.95\textwidth}{ | c | X | c | c | r | r |}
+		\hhline{------}
+		\cellcolor{lightgray}\textbf{Lp.} & \multicolumn{1}{|c|}{\cellcolor{lightgray}\textbf{Nazwa towaru lub usługi}} & \cellcolor{lightgray}\textbf{Jm.} & \cellcolor{lightgray}\textbf{Ilość} &  \multicolumn{1}{|c|}{\cellcolor{lightgray}\textbf{Cena}} & \multicolumn{1}{|c|}{\cellcolor{lightgray}\textbf{Wartość}} \\
+		\hline
+%		1 & Wynajem pokoi pracownikom ( 01.10. ) & osoba & 2 & 600,00 & 1 200,00 \\
+%		\hline
+\VAR{items}
+		\multicolumn{4}{c}{} & \textbf{Razem} & \VAR{total|e} \\
+		\cline{6-6}
+	\end{tabularx}
+	
+	\bigskip 
+	\bigskip 
+
+	\begin{tabularx}{0.95\textwidth}{ l X c l X}
+		\hhline{--~--}
+		Sposób płatności & \VAR{payment_method|e} & \parbox{5mm}{\phantom{.}} & \textbf{Do zapłaty} & \VAR{total|e} PLN \\
+		\hhline{--~--}
+		Termin płatności & \VAR{payment_due_date|e} & & Słownie & \VAR{worded_total_payment|e} 00/100 zł \\
+		\hhline{--~~~}
+		Numer konta & \VAR{payment_account|e} & &  \\
+	\end{tabularx}
+
+	\bigskip 
+	\bigskip 
+	\bigskip 
+	\bigskip 
+
+	\begin{tabularx}{0.95\textwidth}{ l X c X l}
+		& & \parbox{5mm}{\phantom{.}} & & \\
+		\hhline{~-~-~}
+		& \multicolumn{1}{c}{\small{Podpis osoby upoważnionej do wystawienia}} & & \multicolumn{1}{c}{\small{Podpis osoby upoważnionej do odbioru}} & \\
+	\end{tabularx}
+		
+\end{document}
