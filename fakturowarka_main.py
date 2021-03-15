@@ -1,7 +1,8 @@
 import sys
 
 # get the form that works the inputs
-from window import *
+from Widget import Widget
+from MainWindow import *
 
 
 if __name__ == "__main__":
