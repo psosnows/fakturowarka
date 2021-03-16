@@ -116,7 +116,7 @@ class Widget(QWidget):
         self.widget_new_item.setLayout(self.layout_item_input)
 
         # first we create a widget that contains the totals
-        # it will pass its "reduce_total" function to Table Widget so we can sew it into Del buttons
+        # it will pass its "reset total" function to Table Widget so we can sew it into Del buttons
         self.total = TotalWidget(self.input_worded_total_payment, self.input_auto_generate)
 
         self.table = TableWidget()
@@ -343,8 +343,7 @@ class Widget(QWidget):
         self.input_auto_generate.setChecked(bool(doc_data.auto_generate))
         self.toggle_text_generator()
         self.table.replace_items(doc_data.items)
-        self.table.recalc_total()
-
+        self.total.reset_total(self.table.get_total())
 
     def connect_status(self, st):
         self.status = st

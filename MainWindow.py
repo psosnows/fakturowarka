@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         self.status = self.statusBar()
         widget.connect_status(self.status)
 
-        widget.make_load_state(["./domyślne.fkt"])
+        # widget.make_load_state(["./domyślne.fkt"])
 
     @Slot()
     def exit_app(self, checked):

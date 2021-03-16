@@ -83,11 +83,13 @@ class TableWidget(QTableWidget):
         # we need to update these row indexes since we removed an row
         for i in range(index, len(self.buttons)):
             self.buttons[i].row -= 1
+
         self.buttons.pop(index)
 
     def get_total(self) -> float:
         total = 0.0
-        if self.rowCount() > 0:
+        rc = self.rowCount()
+        if rc > 0:
             for am, pr in zip(self.columnAt(2), self.columnAt(3)):
                 total += float(am.text()) * float(pr.text())
 
@@ -99,9 +101,9 @@ class TableWidget(QTableWidget):
             items.append(Item(nam.text(), uni.text(), am.text(), pr.text()))
         return items
 
-    def recalc_total(self):
+    def recalc_total(self, row, col):
         items = self.selectedItems()
-        if items:
+        if items and items[0].column() == col and items[0].row() == row:
             nth_row = items[0].row()
             new_total = float(self.item(nth_row, 2).text()) * float(self.item(nth_row, 3).text())
             self.item(nth_row, 4).setText("%.2f" % new_total)
