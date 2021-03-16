@@ -1,3 +1,6 @@
+import json
+
+import jsonpickle
 from PySide2.QtCore import QDate, Qt
 from PySide2.QtWidgets import QWidget, QLineEdit, QDateEdit, QCheckBox, QFormLayout, QLabel, QHBoxLayout, QPushButton, \
     QGridLayout, QVBoxLayout
@@ -11,7 +14,7 @@ class Widget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
 
-        self.status = ""
+        self.status = None
 
         # Create inputs
         self.input_place = QLineEdit('Gdańsk')
@@ -156,16 +159,15 @@ class Widget(QWidget):
         # Set dialog layout
         self.setLayout(layout)
         # Add button signal to greetings slot
-        self.button.clicked.connect(self.generate_pdf)
+        self.button.clicked.connect(self.generate_pdf_latex)
 
     def add_item(self):
         new_item = Item(self.input_item_name.text(),
                         self.input_item_unit.text(),
-                        float(self.input_item_quantity.text()),
-                        float(self.input_item_price.text()))
-#        self.data.items.append(new_item)
+                        self.input_item_quantity.text(),
+                        self.input_item_price.text())
         self.table.add_item(new_item)
-        self.total.increase_total(new_item.amount * new_item.price)
+        self.total.increase_total(float(new_item.amount) * float(new_item.price))
 
     def generate_data(self):
         items = self.table.get_items()
@@ -196,7 +198,7 @@ class Widget(QWidget):
             self.input_auto_generate.isChecked()
         )
 
-    def generate_pdf(self):
+    def generate_pdf_latex(self):
         from jinja2.loaders import FileSystemLoader
         from latex.jinja2 import make_env
         from latex import build_pdf
@@ -251,19 +253,34 @@ class Widget(QWidget):
 
     def save_state(self):
         from PySide2.QtWidgets import QFileDialog
-        app_data = self.generate_data()
-        save_to_location = QFileDialog.getSaveFileName(self, "Zapisz pracę", ".", "Plik fkt (*.fkt)")
-        if save_to_location[0]:
+        save_to_location = QFileDialog.getSaveFileName(self, "Zapisz pracę", ".", "Plik fkt (*.fkt);;Plik json (*.json)")
+        try:
+            app_data = ''
+            if save_to_location[0] and save_to_location[1] == "Plik fkt (*.fkt)":
+                app_data = str(self.generate_data())
+            elif save_to_location[1] == 'Plik json (*.json)':
+                app_data = jsonpickle.encode(self.generate_data())
+
             with open(save_to_location[0], 'w') as file:
-                file.write(str(app_data))
-        self.status.showMessage("Zapisano pracę", 5000)
+                file.write(app_data)
+
+            self.status.showMessage("Zapisano pracę", 5000)
+        except(OSError, IOError):
+            self.status.showMessage("Błąd! Nie udało się  zapisać stanu.", 5000)
 
     def load_state(self):
         from PySide2.QtWidgets import QFileDialog
-        file_location = QFileDialog.getOpenFileName(self, "Wczytaj pracę", ".", "Plik fkt (*.fkt)")
+        file_location = QFileDialog.getOpenFileName(self, "Wczytaj pracę", ".", "Plik fkt (*.fkt);;Plik json (*.json)")
         self.make_load_state(file_location)
 
     def make_load_state(self, file_location):
+        if file_location[1] == "Plik json (*.json)" and file_location[0]:
+            with open(file_location[0], 'r') as file:
+                loaded_state = jsonpickle.decode(file.read())
+                self.set_state(loaded_state)
+                self.status.showMessage("Wczytano pracę z json.", 5000)
+                return
+
         if file_location[0]:
             try:
                 with open(file_location[0], 'r') as file:
@@ -277,35 +294,35 @@ class Widget(QWidget):
                             items.append(Item(read_data[i*4+24], read_data[i*4+25], read_data[i*4+26], read_data[i*4+27]))
                     box_state = False if read_data[22] == 'False' else True
                     loaded_state = InputDoc(
-                        init_place=read_data[0],
-                        init_make_date=read_data[1],
-                        init_sell_date=read_data[2],
-                        init_sellers_name=read_data[3],
-                        init_sellers_id=read_data[4],
-                        init_sellers_address=read_data[5],
-                        init_sellers_post=read_data[6],
-                        init_sellers_city=read_data[7],
-                        init_buyers_name=read_data[8],
-                        init_buyers_id=read_data[9],
-                        init_buyers_address=read_data[10],
-                        init_buyers_post=read_data[11],
-                        init_buyers_city=read_data[12],
-                        init_bills_id=read_data[13],
-                        init_items=items,
-                        init_worded_total_payment=read_data[14],
-                        init_payment_menthod=read_data[15],
-                        init_payment_due_date=read_data[16],
-                        init_payment_account=read_data[17],
-                        init_item_input_name=read_data[18],
-                        init_item_input_unit=read_data[19],
-                        init_item_input_quantity=float(read_data[20]),
-                        init_item_input_price=float(read_data[21]),
-                        init_auto_generate=box_state
+                        place=read_data[0],
+                        make_date=read_data[1],
+                        sell_date=read_data[2],
+                        sellers_name=read_data[3],
+                        sellers_id=read_data[4],
+                        sellers_address=read_data[5],
+                        sellers_post=read_data[6],
+                        sellers_city=read_data[7],
+                        buyers_name=read_data[8],
+                        buyers_id=read_data[9],
+                        buyers_address=read_data[10],
+                        buyers_post=read_data[11],
+                        buyers_city=read_data[12],
+                        bills_id=read_data[13],
+                        items=items,
+                        worded_total_payment=read_data[14],
+                        payment_method=read_data[15],
+                        payment_due_date=read_data[16],
+                        payment_account=read_data[17],
+                        item_input_name=read_data[18],
+                        item_input_unit=read_data[19],
+                        item_input_quantity=read_data[20],
+                        item_input_price=read_data[21],
+                        auto_generate=box_state
                     )
                     self.set_state(loaded_state)
-                    self.status.showMessage("Wczytano pracę", 2000)
+                    self.status.showMessage("Wczytano pracę", 5000)
             except FileNotFoundError:
-                self.status.showMessage("Wczytano stan zero. Brak pliku startowego: domyślne.fkt", 2000)
+                self.status.showMessage("Wczytano stan zero. Brak pliku startowego: domyślne.fkt", 5000)
 
     def toggle_text_generator(self):
         if self.input_auto_generate.isChecked():

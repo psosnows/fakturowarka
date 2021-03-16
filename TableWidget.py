@@ -47,10 +47,10 @@ class TableWidget(QTableWidget):
         # create items and widgets
         qw_name = QTableWidgetItem(name)
         qw_unit = QTableWidgetItem(unit)
-        qw_quantity = QTableWidgetItem(str(quantity))
-        qw_price = QTableWidgetItem(str(price))
+        qw_quantity = QTableWidgetItem(quantity)
+        qw_price = QTableWidgetItem(price)
         qw_total = QTableWidgetItem(str(float(quantity) * float(price)))
-        button = DelButton("Usuń", new_row_num, quantity * price)
+        button = DelButton("Usuń", new_row_num, float(quantity) * float(price))
 
         # attach a virtual delete function that takes as the parameter the row of the pressed button
         button.clicked.connect(lambda: self.delete_row(button.row))

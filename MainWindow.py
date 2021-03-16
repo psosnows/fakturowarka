@@ -1,4 +1,5 @@
 from PySide2.QtCore import (Slot)
+from PySide2.QtGui import QKeySequence
 from PySide2.QtWidgets import (QMainWindow, QAction,
                                QApplication)
 
@@ -16,21 +17,21 @@ class MainWindow(QMainWindow):
 
         # Load state QAction
         load_state_action = QAction("Otwórz pracę", self)
-        load_state_action.setShortcut("Ctrl+L")
+        load_state_action.setShortcut(QKeySequence("Ctrl+L"))
         load_state_action.triggered.connect(widget.load_state)
 
         self.file_menu.addAction(load_state_action)
 
         # Save state QAction
         save_state_action = QAction("Zapisz pracę", self)
-        save_state_action.setShortcut("Ctrl+S")
+        save_state_action.setShortcut(QKeySequence("Ctrl+S"))
         save_state_action.triggered.connect(widget.save_state)
 
         self.file_menu.addAction(save_state_action)
 
         # Exit QAction
         exit_action = QAction("Zakończ", self)
-        exit_action.setShortcut("Ctrl+Q")
+        exit_action.setShortcut(QKeySequence("Ctrl+Q"))
         exit_action.triggered.connect(self.exit_app)
 
         self.file_menu.addAction(exit_action)
@@ -40,7 +41,7 @@ class MainWindow(QMainWindow):
         self.status = self.statusBar()
         widget.connect_status(self.status)
 
-        # widget.make_load_state(["./domyślne.fkt"])
+        widget.make_load_state(["./domyślne.fkt",".fkt"])
 
     @Slot()
     def exit_app(self, checked):
